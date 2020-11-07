@@ -1,32 +1,87 @@
+import numpy as np
+
 class Cell:
     def __init__(self):
-        pass
+        self.state = False
 
-    def set_state(self, state):
-        if state == 'ON':
-            self.state = True
-        elif state == 'OFF':
-            self.state = False
-        else:
-            raise Exception
+    def turn_on(self):
+        self.state = True
 
+
+
+class Board:
+    def __init__(self, n=5):
+        self.size = n
+        self.board = [[Cell() for _ in range (self.size)] for __ in range(self.size)]
+        self.gen = 0
+
+    def random_population(self, on_fraction = 0.15):
+        i, j = 0, 0
+        for row in self.board:
+            for c in row:
+                p = np.random.rand()
+                if p < on_fraction:
+                    c.turn_on()
+                j += 1
+            i += 1
+            j = 0
     
-    def alt_state(self):
-        try:
-            self.state = not self.state
-        except AttributeError:
-            print("No state associated yet. Please, declare a state ('ON', 'OFF') using the .set_state method")
+
+    def print_board(self):
+        str_board = ''
+        for row in self.board:
+            str_board = str_board + '\n'
+            for c in row:
+                if c.state:
+                    str_board = str_board + '-- '
+                else:
+                    str_board = str_board + '## '
+            
+        print(str_board)
+        print('gen. {}'.format(self.gen))
+
+    def neighbour_matrix(self):
+        self.n_matrix = [[0 for _ in range(self.size)] for __ in range(self.size)]
+
+        for y in range(self.size):
+            for x in range(self.size):
+                left = max(0, x-1)
+                right = min(self.size, x + 2)
+                down = max(0, y-1)
+                up = min(self.size, y + 2)
+                
+                neigh = 0
+                for yneigh in range(down, up):
+                    for xneigh in range(left, right):
+                        if ((xneigh == x) and (yneigh == y)):
+                            pass
+                        
+                        elif self.board[xneigh][yneigh].state:
+                            neigh += 1                        
+                        else:
+                            pass
+
+                self.n_matrix[x][y] = neigh
+              
+        return self.n_matrix
     
+    def next_gen(self, rule='B3/S23'):
+        next_board = [[Cell() for _ in range (self.size)] for __ in range(self.size)]
+        
+        born_rule = rule.split('/')[0]
+        survive_rule = rule.split('/')[1]
 
-    def snap(self):
-        pass
-
-
-    def print_state(self):
-        try:
-            if self.state:
-                print('ON')
-            else:
-                print('OFF')
-        except AttributeError:
-            print("No state associated yet. Please, declare a state ('ON', 'OFF') using the .set_state method")
+        for y in range(self.size):
+            for x in range(self.size):
+                
+                if ( (self.board[x][y].state == False) and str(self.neighbour_matrix()[x][y]) in born_rule):
+                    next_board[x][y].turn_on()
+                
+                elif ( (self.board[x][y].state == True) and str(self.neighbour_matrix()[x][y]) in survive_rule):
+                    next_board[x][y].turn_on()
+                
+                else:
+                    pass
+            
+        self.board = next_board
+        self.gen += 1
