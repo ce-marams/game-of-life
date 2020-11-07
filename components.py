@@ -3,6 +3,18 @@ import numpy as np
 class Cell:
     def __init__(self):
         self.state = False
+    
+    def __repr__(self):
+        if self.state :
+            return "'c = Cell()' \n'c.turn_on()'"
+        else:
+            return "'Cell()'"
+    
+    def __str__(self):
+        if self.state:
+            return "Active Cell object"
+        else:
+            return "Inactive Cell object"
 
     def turn_on(self):
         self.state = True
@@ -14,6 +26,22 @@ class Board:
         self.size = n
         self.board = [[Cell() for _ in range (self.size)] for __ in range(self.size)]
         self.gen = 0
+    
+    def __repr__(self):
+        return "'Board({})'".format(self.size)
+    
+    def __str__(self):
+        shape = '{0}x{0}'.format(self.size)
+        if self.gen == 1:
+            gen = '1st gen. '
+        elif self.gen == 2:
+            gen = '2nd gen. '
+        elif self.gen == 3:
+            gen = '3rd gen. '
+        else:
+            gen = '{}th gen. '.format(self.gen)
+        
+        return gen + shape + 'Board object' + self.str_board()
 
     def random_population(self, on_fraction = 0.15):
         i, j = 0, 0
@@ -27,7 +55,7 @@ class Board:
             j = 0
     
 
-    def print_board(self):
+    def str_board(self):
         str_board = ''
         for row in self.board:
             str_board = str_board + '\n'
@@ -37,8 +65,7 @@ class Board:
                 else:
                     str_board = str_board + '## '
             
-        print(str_board)
-        print('gen. {}'.format(self.gen))
+        return str_board
 
     def neighbour_matrix(self):
         self.n_matrix = [[0 for _ in range(self.size)] for __ in range(self.size)]
